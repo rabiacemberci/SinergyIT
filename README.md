@@ -79,7 +79,7 @@ Burada dikkat etmeniz gereken bir nokta var: Eğer bu adımlardan herhangi biri 
 Soru:
 1.	Bu süreci yönetmek için bir Saga pattern tasarlayın ve basit bir durum makinesi (state machine) diyagramı çizin. Sipariş Verildi aşamasından Sipariş Tamamlandı aşamasına kadar olan her bir durumu çizin ve her bir başarısızlık durumunda geri alma adımlarını gösterin.
 
-
+![1](https://github.com/user-attachments/assets/447238a9-99b8-43de-b9d9-c0420fafe651)
 
 
 2.	Her bir durumda, ilgili hizmetin başarılı ya da başarısız olması durumunda nasıl bir geçiş yapılacağını açıklayın.
