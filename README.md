@@ -81,6 +81,7 @@ Soru:
 
 ![1](https://github.com/user-attachments/assets/447238a9-99b8-43de-b9d9-c0420fafe651)
 
+![2](https://github.com/user-attachments/assets/9459624f-1533-4d10-be85-973397aca4fe)
 
 2.	Her bir durumda, ilgili hizmetin başarılı ya da başarısız olması durumunda nasıl bir geçiş yapılacağını açıklayın.
 
