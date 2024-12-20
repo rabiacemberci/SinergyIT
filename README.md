@@ -1,9 +1,4 @@
-# Saga Pattern: Dağıtık Sistemlerdeki Problemleri Çözme Yaklaşımı
-
-## Saga Pattern'in Amaçları
-
-Saga pattern, mikroservis mimarisinde şu temel sorunları çözmeye odaklanır:
-
+## 1. Saga pattern, mikroservis mimarisinde şu temel sorunları çözmeye odaklanır:
 - **Dağıtık İşlem Koordinasyonu:** Birden fazla servis arasındaki işlem sırasını düzenler.
 - **Veri Tutarlılığı:** ACID yerine eventual consistency sağlar, başarısız işlemleri telafi eder.
 - **Hata Yönetimi:** Başarısızlık durumunda rollback veya kompanzasyon mekanizmaları ile sorunları giderir.
@@ -13,7 +8,7 @@ Saga pattern, mikroservis mimarisinde şu temel sorunları çözmeye odaklanır:
 
 ---
 
-## Saga Pattern: Choreography ve Orchestration Karşılaştırması
+## 2.	Saga patterndeki choreography ve orchestration yaklaşımları arasındaki temel fark nedir?
 
 ### 1. Koordinasyon Yöntemi
 
@@ -57,7 +52,7 @@ Saga pattern, mikroservis mimarisinde şu temel sorunları çözmeye odaklanır:
 
 ---
 
-## Orchestration Saga Pattern: Avantajlar ve Dezavantajlar
+## 3.	Orchestration Saga pattern avantajları ve dezavantajları nelerdir?
 
 | Kriter            | Avantajlar                                                | Dezavantajlar                                                |
 |--------------------|----------------------------------------------------------|--------------------------------------------------------------|
@@ -72,24 +67,82 @@ Saga pattern, mikroservis mimarisinde şu temel sorunları çözmeye odaklanır:
 
 ---
 
-## Saga Pattern Kullanım Senaryosu: E-Ticaret Uygulaması
+## 4.	Bir e-ticaret uygulaması tasarladığınızı düşünelim. Bu uygulamada müşteriler sipariş verdiklerinde, birden fazla hizmetin birlikte çalışması gerekiyor. Müşteri bir sipariş verdiğinde şu adımlar gerçekleşmeli:
 
 Bir e-ticaret uygulamasında, müşteri bir sipariş verdiğinde şu adımların gerçekleşmesi gerekir:
 
-1. **Stok Kontrolü:** Stokta mevcut ürünler kontrol edilir ve rezerve edilir.
-2. **Ödeme Kontrolü:** Müşterinin yeterli bakiyesi olup olmadığı kontrol edilir ve ödeme gerçekleştirilir.
-3. **Kargo Hazırlığı:** Ödeme onaylandıktan sonra kargo hazırlanır ve teslimat planlanır.
+1. Stokta mevcut ürünleri kontrol eder ve onları rezerve eder.
+2. Müşterinin yeterli bakiye olup olmadığı kontrol edilir ve ödeme işlemi gerçekleştirilir. 
+3.	Kargo ödeme onaylandıktan sonra gönderi için hazırlık yapar ve teslimat planlanır.
 
-### Hata Durumları
-- Ödeme başarısız olursa stok rezervi kaldırılmalıdır.
-- Kargo işlemi başarısız olursa ödeme iade edilmelidir.
+Burada dikkat etmeniz gereken bir nokta var: Eğer bu adımlardan herhangi biri başarısız olursa (örneğin, ödeme başarısız olursa veya stokta ürün yoksa), sistem önceki adımları geri alarak verilerin tutarlılığını sağlamalıdır. Yani, ödeme başarısız olursa stoktaki rezerv kaldırılmalı, kargo işlemi başarısız olursa ödeme iade edilmelidir..
+Soru:
+1.	Bu süreci yönetmek için bir Saga pattern tasarlayın ve basit bir durum makinesi (state machine) diyagramı çizin. Sipariş Verildi aşamasından Sipariş Tamamlandı aşamasına kadar olan her bir durumu çizin ve her bir başarısızlık durumunda geri alma adımlarını gösterin.
+
+
+
+
+2.	Her bir durumda, ilgili hizmetin başarılı ya da başarısız olması durumunda nasıl bir geçiş yapılacağını açıklayın.
+
+### 1. Sipariş Hizmeti
+
+- **Başarılı:**
+  - Sipariş oluşturulur ve sistem bir sonraki adıma, yani Stok Hizmeti'ne geçer.
+  - **Tetiklenen Olay:** “Sipariş oluşturuldu.”
+  - **Koordinasyon:**
+    - Olay tabanlı yaklaşımda "Sipariş oluşturuldu." mesajı Message Broker üzerinden Stok Hizmeti'ne gönderilir.
+    - Orchestrator yaklaşımında, Stok Hizmeti'ni çağırır.
+- **Başarısız:**
+  - Sipariş oluşturulamazsa süreç burada sonlanır ve sipariş iptal edilir.
+  - **Tetiklenen Olay:** “Sipariş iptal edildi.”
+  - **Tutarlılık:** Hiçbir işlem yapılmadığı için rollback gerekmez.
+
+### 2. Stok Hizmeti
+
+- **Başarılı:**
+  - Stok rezerve edilir ve sistem bir sonraki adıma, yani Ödeme Hizmeti'ne geçer.
+  - **Tetiklenen Olay:** “Stok rezerve edildi.”
+  - **Koordinasyon:**
+    - Olay tabanlı yaklaşımda Stok Hizmeti, "Stok rezerve edildi." mesajı Message Broker üzerinden Ödeme Hizmeti’ne gönderilir.
+    - Orchestrator yaklaşımında, Ödeme Hizmeti'ni çağırır.
+- **Başarısız:**
+  - Stok rezervasyonu başarısız olursa sipariş iptal edilir.
+  - **Tetiklenen Olay:** “Stok rezerve edilemedi.”
+  - **Tutarlılık:** Sipariş Hizmeti'ne geri dönülür ve sipariş iptal edilir.
+    - "Sipariş iptal edildi.”
+    - Stok rezervasyonu yapılmadığı için başka rollback gerekmez.
+
+### 3. Ödeme Hizmeti
+
+- **Başarılı:**
+  - Ödeme başarıyla gerçekleştirilir ve sistem bir sonraki adıma, yani Kargo Hizmeti'ne geçer.
+  - **Tetiklenen Olay:** “Ödeme tamamlandı.”
+  - **Koordinasyon:**
+    - Olay tabanlı yaklaşımda "Ödeme tamamlandı." mesajı Message Broker üzerinden Kargo Hizmeti'ne gönderilir.
+    - Orchestrator yaklaşımında, Kargo Hizmeti'ni çağırır.
+- **Başarısız:**
+  - Ödeme başarısız olursa sistem önceki adıma döner.
+  - **Tetiklenen Olay:** “Ödeme başarısız oldu.”
+  - **Tutarlılık:**
+    - "Stok rezerve edildi." geri alınır.
+    - "Sipariş iptal edildi.”
+
+### 4. Kargo Hizmeti
+
+- **Başarılı:**
+  - Kargo gönderimi gerçekleştirilir ve süreç sona erer.
+  - **Tetiklenen Olay:** “Kargo gönderildi.”
+  - **Koordinasyon:**
+    - Olay tabanlı yaklaşımda "Kargo gönderimi tamamlandı." mesajı Message Broker üzerinden sürecin sonlandığını bildirir.
+    - Orchestrator süreci tamamlar ve sistemi sonlandırır.
+- **Başarısız:**
+  - Kargo gönderimi başarısız olursa sistem önceki adıma döner.
+  - **Tetiklenen Olay:** “Kargo iptal oldu.”
+  - **Tutarlılık:**
+    - "Ödeme tamamlandı.” geri alınır.
+    - "Stok rezerve edildi" geri alınır.
+    - "Sipariş iptal edildi.”
 
 ---
 
-## Tasarım Talimatları
-
-Saga pattern ile bu süreçteki her adımı ve hata durumunda yapılacak geri alma işlemlerini düzenleyin.
-
-- Sipariş Verildi aşamasından Sipariş Tamamlandı aşamasına kadar olan her durumu bir durum makinesi diyagramı ile gösterin.
-- Her bir başarı veya başarısızlık durumunda, sürecin hangi yöne ilerleyeceğini belirtin.
 
