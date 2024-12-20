@@ -84,7 +84,7 @@ Soru:
 
 2.	Her bir durumda, ilgili hizmetin başarılı ya da başarısız olması durumunda nasıl bir geçiş yapılacağını açıklayın.
 
-### 1. Sipariş Hizmeti
+#### 1. Sipariş Hizmeti
 
 - **Başarılı:**
   - Sipariş oluşturulur ve sistem bir sonraki adıma, yani Stok Hizmeti'ne geçer.
@@ -97,7 +97,7 @@ Soru:
   - **Tetiklenen Olay:** “Sipariş iptal edildi.”
   - **Tutarlılık:** Hiçbir işlem yapılmadığı için rollback gerekmez.
 
-### 2. Stok Hizmeti
+#### 2. Stok Hizmeti
 
 - **Başarılı:**
   - Stok rezerve edilir ve sistem bir sonraki adıma, yani Ödeme Hizmeti'ne geçer.
@@ -112,7 +112,7 @@ Soru:
     - "Sipariş iptal edildi.”
     - Stok rezervasyonu yapılmadığı için başka rollback gerekmez.
 
-### 3. Ödeme Hizmeti
+#### 3. Ödeme Hizmeti
 
 - **Başarılı:**
   - Ödeme başarıyla gerçekleştirilir ve sistem bir sonraki adıma, yani Kargo Hizmeti'ne geçer.
@@ -127,7 +127,7 @@ Soru:
     - "Stok rezerve edildi." geri alınır.
     - "Sipariş iptal edildi.”
 
-### 4. Kargo Hizmeti
+#### 4. Kargo Hizmeti
 
 - **Başarılı:**
   - Kargo gönderimi gerçekleştirilir ve süreç sona erer.
